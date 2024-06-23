@@ -91,5 +91,3 @@ if st.button('Calcular Probabilidade'):
     st.write(f"A probabilidade de um aluno ter média entre {lower_bound} e {upper_bound} é:")
     st.write(f"Usando a CDF da mistura de gaussianas: {probabilidade_bimodal:.4f}")
     st.write(f"Usando a KDE: {probabilidade_kde:.4f}")
-
-!pip install streamlit
