@@ -103,3 +103,4 @@ if st.button('Calcular Probabilidade'):
     st.write(f"Usando a KDE: {probabilidade_kde:.4f} {'(Dentro do intervalo de confiança)' if dentro_intervalo_kde else '(Fora do intervalo de confiança)'}")
     st.write(f"Probabilidade ocorrida na turma: {probabilidade_ocorrida:.4f}")
     st.write(f"Intervalo de confiança para a probabilidade ocorrida (95%): [{intervalo_confianca_inferior:.4f}, {intervalo_confianca_superior:.4f}]")
+
