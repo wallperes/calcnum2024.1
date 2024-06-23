@@ -1,9 +1,8 @@
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.stats import norm, gaussian_kde, binom
+from scipy.stats import norm, gaussian_kde
 from scipy.integrate import quad
-import math
 
 # Dados das médias dos alunos
 medias = [
@@ -72,6 +71,42 @@ st.pyplot(fig)
 lower_bound = st.number_input('Limite Inferior:', value=0.0)
 upper_bound = st.number_input('Limite Superior:', value=10.0)
 
+# Função para calcular intervalo de confiança
+def calc_intervalo_confianca(p, n, z=1.96):
+    erro_maximo = 0.02  # 2%
+    intervalo_inferior = max(0, p - erro_maximo)
+    intervalo_superior = min(1, p + erro_maximo)
+    return intervalo_inferior, intervalo_superior
+
+# Função para verificar intervalos possíveis
+def verificar_todos_intervalos():
+    dentro_intervalo_bimodal = True
+    dentro_intervalo_kde = True
+
+    for lb in np.linspace(0, 10, 50):
+        for ub in np.linspace(lb, 10, 50):
+            # Calculando a probabilidade usando a CDF da mistura de gaussianas
+            probabilidade_bimodal = bimodal_cdf(ub, alpha_est, mu1_est, sigma1_est, mu2_est, sigma2_est) - \
+                                    bimodal_cdf(lb, alpha_est, mu1_est, sigma1_est, mu2_est, sigma2_est)
+
+            # Calculando a probabilidade usando a KDE
+            probabilidade_kde, _ = quad(kde_scott, lb, ub)
+
+            # Calculando a probabilidade ocorrida na turma
+            num_alunos_intervalo = sum(lb <= m <= ub for m in medias)
+            probabilidade_ocorrida = num_alunos_intervalo / len(medias)
+
+            # Calculando intervalo de confiança para a probabilidade ocorrida
+            intervalo_confianca_inferior, intervalo_confianca_superior = calc_intervalo_confianca(probabilidade_ocorrida, len(medias))
+
+            # Verificando se as estimativas estão dentro do intervalo de confiança
+            if not (intervalo_confianca_inferior <= probabilidade_bimodal <= intervalo_confianca_superior):
+                dentro_intervalo_bimodal = False
+            if not (intervalo_confianca_inferior <= probabilidade_kde <= intervalo_confianca_superior):
+                dentro_intervalo_kde = False
+
+    return dentro_intervalo_bimodal, dentro_intervalo_kde
+
 if st.button('Calcular Probabilidade'):
     # Calculando a probabilidade usando a CDF da mistura de gaussianas
     probabilidade_bimodal = bimodal_cdf(upper_bound, alpha_est, mu1_est, sigma1_est, mu2_est, sigma2_est) - \
@@ -85,18 +120,10 @@ if st.button('Calcular Probabilidade'):
     probabilidade_ocorrida = num_alunos_intervalo / len(medias)
 
     # Calculando intervalo de confiança para a probabilidade ocorrida
-    n = len(medias)
-    z = 1.96  # valor z para 95% de confiança
-    p = probabilidade_ocorrida
-    erro_maximo = 0.02  # 2%
-    
-    # Ajustando o intervalo de confiança para um erro máximo de 2%
-    intervalo_confianca_inferior = max(0, p - erro_maximo)
-    intervalo_confianca_superior = min(1, p + erro_maximo)
-    
+    intervalo_confianca_inferior, intervalo_confianca_superior = calc_intervalo_confianca(probabilidade_ocorrida, len(medias))
+
     # Verificando se as estimativas estão dentro do intervalo de confiança
-    dentro_intervalo_bimodal = intervalo_confianca_inferior <= probabilidade_bimodal <= intervalo_confianca_superior
-    dentro_intervalo_kde = intervalo_confianca_inferior <= probabilidade_kde <= intervalo_confianca_superior
+    dentro_intervalo_bimodal, dentro_intervalo_kde = verificar_todos_intervalos()
 
     st.write(f"A probabilidade de um aluno ter média entre {lower_bound} e {upper_bound} é:")
     st.write(f"Usando a CDF da mistura de gaussianas: {probabilidade_bimodal:.4f} {'(Dentro do intervalo de confiança)' if dentro_intervalo_bimodal else '(Fora do intervalo de confiança)'}")
@@ -104,3 +131,6 @@ if st.button('Calcular Probabilidade'):
     st.write(f"Probabilidade ocorrida na turma: {probabilidade_ocorrida:.4f}")
     st.write(f"Intervalo de confiança para a probabilidade ocorrida (95%): [{intervalo_confianca_inferior:.4f}, {intervalo_confianca_superior:.4f}]")
 
+    st.write(f"Verificação de todos os intervalos possíveis:")
+    st.write(f"Distribuição Bimodal está dentro do intervalo de confiança para todos os intervalos: {'Sim' if dentro_intervalo_bimodal else 'Não'}")
+    st.write(f"KDE está dentro do intervalo de confiança para todos os intervalos: {'Sim' if dentro_intervalo_kde else 'Não'}")
