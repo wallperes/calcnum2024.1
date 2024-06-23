@@ -88,16 +88,18 @@ if st.button('Calcular Probabilidade'):
     n = len(medias)
     z = 1.96  # valor z para 95% de confiança
     p = probabilidade_ocorrida
-    intervalo_confianca_inferior = p - z * math.sqrt((p * (1 - p)) / n)
-    intervalo_confianca_superior = p + z * math.sqrt((p * (1 - p)) / n)
+    erro_maximo = 0.02  # 2%
+    
+    # Ajustando o intervalo de confiança para um erro máximo de 2%
+    intervalo_confianca_inferior = max(0, p - erro_maximo)
+    intervalo_confianca_superior = min(1, p + erro_maximo)
     
     # Verificando se as estimativas estão dentro do intervalo de confiança
     dentro_intervalo_bimodal = intervalo_confianca_inferior <= probabilidade_bimodal <= intervalo_confianca_superior
     dentro_intervalo_kde = intervalo_confianca_inferior <= probabilidade_kde <= intervalo_confianca_superior
 
     st.write(f"A probabilidade de um aluno ter média entre {lower_bound} e {upper_bound} é:")
-    st.write(f"Usando a bimodal estimada: {probabilidade_bimodal:.4f} {'(Dentro do intervalo de confiança)' if dentro_intervalo_bimodal else '(Fora do intervalo de confiança)'}")
-    st.write(f"Usando a KDE estimada: {probabilidade_kde:.4f} {'(Dentro do intervalo de confiança)' if dentro_intervalo_kde else '(Fora do intervalo de confiança)'}")
+    st.write(f"Usando a CDF da mistura de gaussianas: {probabilidade_bimodal:.4f} {'(Dentro do intervalo de confiança)' if dentro_intervalo_bimodal else '(Fora do intervalo de confiança)'}")
+    st.write(f"Usando a KDE: {probabilidade_kde:.4f} {'(Dentro do intervalo de confiança)' if dentro_intervalo_kde else '(Fora do intervalo de confiança)'}")
     st.write(f"Probabilidade ocorrida na turma: {probabilidade_ocorrida:.4f}")
     st.write(f"Intervalo de confiança para a probabilidade ocorrida (95%): [{intervalo_confianca_inferior:.4f}, {intervalo_confianca_superior:.4f}]")
-
