@@ -42,8 +42,6 @@ kde_scott.set_bandwidth(bw_method=kde_scott.factor * 0.5)
 # Parâmetros estimados pelo KDE com a regra de Scott ajustada
 bandwidth_scott = kde_scott.factor  # Largura de banda estimada
 
-st.write(f"Parâmetros estimados pelo KDE com a regra de Scott ajustada:")
-st.write(f"Largura de banda estimada: {bandwidth_scott:.4f}")
 
 # Gerando os dados suavizados para plotagem
 y_kde_scott = kde_scott(x)
@@ -99,7 +97,7 @@ if st.button('Calcular Probabilidade'):
     dentro_intervalo_kde = intervalo_confianca_inferior <= probabilidade_kde <= intervalo_confianca_superior
 
     st.write(f"A probabilidade de um aluno ter média entre {lower_bound} e {upper_bound} é:")
-    st.write(f"Usando a CDF da mistura de gaussianas: {probabilidade_bimodal:.4f} {'(Dentro do intervalo de confiança)' if dentro_intervalo_bimodal else '(Fora do intervalo de confiança)'}")
-    st.write(f"Usando a KDE: {probabilidade_kde:.4f} {'(Dentro do intervalo de confiança)' if dentro_intervalo_kde else '(Fora do intervalo de confiança)'}")
-    st.write(f"Probabilidade ocorrida na turma: {probabilidade_ocorrida:.4f}")
+    st.write(f"Usando a bimodal estimada: {probabilidade_bimodal:.4f} {'(Dentro do intervalo de confiança)' if dentro_intervalo_bimodal else '(Fora do intervalo de confiança)'}")
+    st.write(f"Usando a estimação por KDE: {probabilidade_kde:.4f} {'(Dentro do intervalo de confiança)' if dentro_intervalo_kde else '(Fora do intervalo de confiança)'}")
+    st.write(f"Probabilidade real ocorrida na turma: {probabilidade_ocorrida:.4f}")
     st.write(f"Intervalo de confiança para a probabilidade ocorrida (95%): [{intervalo_confianca_inferior:.4f}, {intervalo_confianca_superior:.4f}]")
